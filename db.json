@@ -1,0 +1,19 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "content": "Do only what only you can do.",
+      "date": "2024-06-24T12:00:00Z"
+    },
+    {
+      "id": 2,
+      "content": "Elegance is not a dispensable luxury but a factor that decides between success and failure.",
+      "date": "2024-06-25T12:00:00Z"
+    },
+    {
+      "id": 3,
+      "content": "The question of whether computers can think is like the question of whether submarines can swim.",
+      "date": "2024-06-26T12:00:00Z"
+    }
+  ]
+}

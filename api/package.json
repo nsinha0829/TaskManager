@@ -1,19 +1,18 @@
 {
-  "name": "my-app",
-  "type": "module",
+  "name": "assignment-tracker-api",
+  "version": "1.0.0",
+  "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx src/index.ts",
     "build": "tsc",
-    "start": "node dist/server.ts",
-    "prettier": "prettier --write \"src/**/*.ts\" --config \".prettierrc.json\""
+    "start": "node dist/index.js"
   },
   "dependencies": {
-    "@hono/node-server": "^1.19.6",
-    "hono": "^4.10.4"
+    "@hono/node-server": "^1.13.5",
+    "hono": "^4.10.6"
   },
   "devDependencies": {
-    "@types/node": "^20.11.17",
-    "tsx": "^4.7.1",
-    "typescript": "^5.8.3"
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
   }
 }
