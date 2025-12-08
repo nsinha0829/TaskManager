@@ -7,8 +7,7 @@ type Props = {
   onSubjectFilterChange: (subject: string) => void;
   sortBy: "dueDate" | "subject";
   onSortByChange: (sortBy: "dueDate" | "subject") => void;
-  onToggleComplete: (id: number, completed: boolean) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: number) => void; // checkbox will delete
 };
 
 export const AssignmentList: React.FC<Props> = ({
@@ -17,7 +16,6 @@ export const AssignmentList: React.FC<Props> = ({
   onSubjectFilterChange,
   sortBy,
   onSortByChange,
-  onToggleComplete,
   onDelete
 }) => {
   const subjects = Array.from(
@@ -25,7 +23,7 @@ export const AssignmentList: React.FC<Props> = ({
   ).sort();
 
   return (
-    <div style={{ flex: 1, padding: "1rem" }}>
+    <div style={{ flex: 1, padding: "1rem 0" }}>
       <div
         style={{
           display: "flex",
@@ -35,16 +33,22 @@ export const AssignmentList: React.FC<Props> = ({
         }}
       >
         <h2 style={{ margin: 0 }}>Assignments</h2>
-        <span style={{ color: "#555" }}>
+        <span style={{ color: "#555", fontSize: "0.9rem" }}>
           Total: {assignments.length}
         </span>
 
         <div style={{ marginLeft: "auto", display: "flex", gap: "0.5rem" }}>
-          <label>
+          <label style={{ fontSize: "0.85rem" }}>
             Filter by subject:{" "}
             <select
               value={subjectFilter}
               onChange={(e) => onSubjectFilterChange(e.target.value)}
+              style={{
+                padding: "0.25rem 0.4rem",
+                borderRadius: "999px",
+                border: "1px solid #e5e7eb",
+                fontSize: "0.85rem"
+              }}
             >
               <option value="">All</option>
               {subjects.map((subj) => (
@@ -55,13 +59,19 @@ export const AssignmentList: React.FC<Props> = ({
             </select>
           </label>
 
-          <label>
+          <label style={{ fontSize: "0.85rem" }}>
             Sort by:{" "}
             <select
               value={sortBy}
               onChange={(e) =>
                 onSortByChange(e.target.value as "dueDate" | "subject")
               }
+              style={{
+                padding: "0.25rem 0.4rem",
+                borderRadius: "999px",
+                border: "1px solid #e5e7eb",
+                fontSize: "0.85rem"
+              }}
             >
               <option value="dueDate">Due date</option>
               <option value="subject">Subject</option>
@@ -71,7 +81,9 @@ export const AssignmentList: React.FC<Props> = ({
       </div>
 
       {assignments.length === 0 ? (
-        <p style={{ color: "#666" }}>No assignments yet.</p>
+        <p style={{ color: "#666", textAlign: "center", marginTop: "1rem" }}>
+          No assignments yet.
+        </p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
           {assignments.map((a) => (
@@ -79,13 +91,14 @@ export const AssignmentList: React.FC<Props> = ({
               key={a.id}
               style={{
                 border: "1px solid #ddd",
-                borderRadius: "0.5rem",
+                borderRadius: "0.75rem",
                 padding: "0.75rem 1rem",
-                marginBottom: "0.5rem",
+                marginBottom: "0.6rem",
                 display: "flex",
                 alignItems: "center",
                 gap: "0.75rem",
-                backgroundColor: a.color + "22" // transparent tint
+                backgroundColor: a.color + "22",
+                boxShadow: "0 2px 6px rgba(148, 163, 184, 0.25)"
               }}
             >
               <div
@@ -98,21 +111,22 @@ export const AssignmentList: React.FC<Props> = ({
               />
 
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <strong
-                    style={{
-                      textDecoration:
-                        a.completed ? "line-through" : "none"
-                    }}
-                  >
-                    {a.title}
-                  </strong>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    alignItems: "center",
+                    marginBottom: "0.15rem"
+                  }}
+                >
+                  <strong>{a.title}</strong>
                   <span
                     style={{
-                      padding: "0.1rem 0.4rem",
+                      padding: "0.1rem 0.45rem",
                       borderRadius: "999px",
                       fontSize: "0.75rem",
-                      backgroundColor: "#eee"
+                      backgroundColor: "#eef2ff",
+                      color: "#3730a3"
                     }}
                   >
                     {a.subject}
@@ -123,31 +137,23 @@ export const AssignmentList: React.FC<Props> = ({
                 </div>
               </div>
 
-              <label style={{ fontSize: "0.85rem" }}>
+              <label
+                style={{
+                  fontSize: "0.8rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  color: "#6b7280"
+                }}
+              >
                 <input
                   type="checkbox"
-                  checked={!!a.completed}
-                  onChange={(e) =>
-                    onToggleComplete(a.id, e.target.checked)
-                  }
-                  style={{ marginRight: "0.25rem" }}
+                  onChange={() => onDelete(a.id)}
+                  style={{ cursor: "pointer" }}
+                  title="Check to mark done & delete"
                 />
                 Done
               </label>
-
-              <button
-                onClick={() => onDelete(a.id)}
-                style={{
-                  border: "none",
-                  background: "#fee2e2",
-                  color: "#b91c1c",
-                  padding: "0.25rem 0.5rem",
-                  borderRadius: "0.25rem",
-                  cursor: "pointer"
-                }}
-              >
-                Delete
-              </button>
             </li>
           ))}
         </ul>

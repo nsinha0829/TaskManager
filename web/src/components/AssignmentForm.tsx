@@ -1,7 +1,8 @@
-// web/src/components/AssignmentForm.tsx
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import type { Subject } from "./SubjectForm";
 
 type Props = {
+  subjects: Subject[];
   onCreate: (input: {
     title: string;
     subject: string;
@@ -10,30 +11,43 @@ type Props = {
   }) => Promise<void>;
 };
 
-const defaultColors = [
-  "#f97373", // red-ish
-  "#facc15", // yellow-ish
-  "#4ade80", // green-ish
-  "#60a5fa", // blue-ish
-  "#a78bfa"  // purple-ish
-];
-
-export const AssignmentForm: React.FC<Props> = ({ onCreate }) => {
+export const AssignmentForm: React.FC<Props> = ({
+  subjects,
+  onCreate
+}) => {
   const [title, setTitle] = useState("");
-  const [subject, setSubject] = useState("");
+  const [subjectName, setSubjectName] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [color, setColor] = useState(defaultColors[0]);
   const [loading, setLoading] = useState(false);
+
+  const hasSubjects = subjects.length > 0;
+
+  // If nothing selected yet but there are subjects, default to the first one
+  useEffect(() => {
+    if (!subjectName && subjects.length > 0) {
+      setSubjectName(subjects[0].name);
+    }
+  }, [subjects, subjectName]);
+
+  const selectedSubject = useMemo(
+    () => subjects.find((s) => s.name === subjectName),
+    [subjects, subjectName]
+  );
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title || !subject || !dueDate) return;
+    if (!title || !dueDate || !selectedSubject) return;
     setLoading(true);
     try {
-      await onCreate({ title, subject, dueDate, color });
+      await onCreate({
+        title,
+        subject: selectedSubject.name,
+        dueDate,
+        color: selectedSubject.color
+      });
       setTitle("");
-      setSubject("");
       setDueDate("");
+      // keep same subject for next add
     } finally {
       setLoading(false);
     }
@@ -79,18 +93,58 @@ export const AssignmentForm: React.FC<Props> = ({ onCreate }) => {
 
       <label style={{ fontSize: "0.9rem" }}>
         Subject
-        <input
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          required
-          style={{
-            width: "100%",
-            padding: "0.4rem 0.6rem",
-            borderRadius: "0.6rem",
-            border: "1px solid #d4d4d8",
-            marginTop: "0.15rem"
-          }}
-        />
+        {!hasSubjects ? (
+          <div
+            style={{
+              marginTop: "0.3rem",
+              fontSize: "0.8rem",
+              color: "#9ca3af"
+            }}
+          >
+            No subjects yet. Add a subject from the sidebar first.
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              alignItems: "center",
+              marginTop: "0.15rem"
+            }}
+          >
+            <select
+              value={subjectName}
+              onChange={(e) => setSubjectName(e.target.value)}
+              required
+              style={{
+                flex: 1,
+                padding: "0.4rem 0.6rem",
+                borderRadius: "0.6rem",
+                border: "1px solid #d4d4d8",
+                backgroundColor: "white"
+              }}
+            >
+              {subjects.map((subj) => (
+                <option key={subj.name} value={subj.name}>
+                  {subj.name}
+                </option>
+              ))}
+            </select>
+            {selectedSubject && (
+              <span
+                title={`Color for ${selectedSubject.name}`}
+                style={{
+                  width: "22px",
+                  height: "22px",
+                  borderRadius: "999px",
+                  backgroundColor: selectedSubject.color,
+                  border: "2px solid #0f172a",
+                  flexShrink: 0
+                }}
+              />
+            )}
+          </div>
+        )}
       </label>
 
       <label style={{ fontSize: "0.9rem" }}>
@@ -110,60 +164,21 @@ export const AssignmentForm: React.FC<Props> = ({ onCreate }) => {
         />
       </label>
 
-      <label style={{ fontSize: "0.9rem" }}>
-        Color
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            marginTop: "0.25rem",
-            alignItems: "center",
-            flexWrap: "wrap"
-          }}
-        >
-          {defaultColors.map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setColor(c)}
-              style={{
-                width: "24px",
-                height: "24px",
-                borderRadius: "999px",
-                border: c === color ? "2px solid #0f172a" : "1px solid #d4d4d8",
-                backgroundColor: c,
-                cursor: "pointer"
-              }}
-            />
-          ))}
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            style={{ marginLeft: "0.25rem", borderRadius: "999px" }}
-          />
-        </div>
-      </label>
-
       <button
-  type="submit"
-  disabled={loading}
-  style={{
-    marginTop: "0.5rem",
-    padding: "0.5rem 0.75rem",
-    borderRadius: "999px",
-    border: "none",
-    cursor: "pointer",
-    background: "#1e3a8a", // dark blue
-    color: "white",
-    fontWeight: 600,
-    fontSize: "0.95rem",
-    boxShadow: "0 4px 12px rgba(30, 58, 138, 0.35)"
-  }}
->
-  {loading ? "Adding..." : "Add Assignment"}
-</button>
-
+        type="submit"
+        disabled={loading || !selectedSubject}
+        className="primary-button"
+        style={{
+          marginTop: "0.5rem",
+          justifyContent: "center"
+        }}
+      >
+        {loading
+          ? "Adding..."
+          : selectedSubject
+          ? "Add Assignment"
+          : "Add a subject first"}
+      </button>
     </form>
   );
 };

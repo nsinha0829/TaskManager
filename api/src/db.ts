@@ -19,7 +19,7 @@ export type Assignment = {
   ): Assignment[] {
     let result = [...assignments];
   
-    if (subject && subject.trim() !== "") {
+    if (subject && subject.trim() !== " ") {
       result = result.filter((a) => a.subject === subject);
     }
   

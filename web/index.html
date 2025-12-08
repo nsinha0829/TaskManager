@@ -24,6 +24,41 @@
         background: #f9fafb;
         color: #0f172a;
       }
+
+      .primary-button {
+        padding: 0.7rem 1rem;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        background: #1e3a8a; /* dark blue */
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+        box-shadow: 0 6px 16px rgba(30, 58, 138, 0.35);
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.12s ease, box-shadow 0.12s ease,
+          background 0.12s ease;
+      }
+
+      .primary-button:hover:not(:disabled) {
+        background: #1d4ed8; /* brighter blue */
+        box-shadow: 0 10px 22px rgba(30, 64, 175, 0.4);
+        transform: translateY(-1px);
+      }
+
+      .primary-button:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+      }
+
+      .primary-button:disabled {
+        opacity: 0.6;
+        cursor: default;
+        box-shadow: none;
+      }
     </style>
   </head>
   <body>
