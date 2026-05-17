@@ -35,11 +35,7 @@ assignments.post("/", async (c) => {
     subject,
     dueDate,
     color,
-    subtasks: Array.isArray(subtasks)
-      ? subtasks.filter(
-          (subtask) => typeof subtask === "string" && subtask.trim() !== ""
-        )
-      : []
+    subtasks: Array.isArray(subtasks) ? subtasks : []
   });
 
   return c.json(created, 201);

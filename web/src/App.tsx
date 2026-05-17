@@ -26,6 +26,7 @@ const App: React.FC = () => {
     loading,
     reload,
     createAssignment,
+    updateAssignment,
     deleteAssignment
   } = useAssignments({
     subjectFilter,
@@ -36,31 +37,38 @@ const App: React.FC = () => {
   useEffect(() => {
     if (subjects.length === 0 && assignments.length > 0) {
       const map = new Map<string, string>();
+
       for (const a of assignments) {
         if (!map.has(a.subject)) map.set(a.subject, a.color || "#60a5fa");
       }
+
       const initial = Array.from(map.entries())
         .map(([name, color]) => ({ name, color }))
         .sort((a, b) => a.name.localeCompare(b.name));
+
       setSubjects(initial);
     }
   }, [assignments]);
 
   function handleAddSubject(s: Subject) {
     const result = addSubject(s);
+
     if (!result.ok) {
       showToast(result.reason, "info");
       return;
     }
+
     showToast("Subject added ✨", "success");
   }
 
   function handleDeleteSubject(name: string) {
     const hasAssignmentsWithSubject = assignments.some((a) => a.subject === name);
+
     if (hasAssignmentsWithSubject) {
       showToast("Delete or move assignments with this subject before removing it.", "error");
       return;
     }
+
     deleteSubject(name);
     showToast("Subject deleted 🗑️", "success");
   }
@@ -81,6 +89,29 @@ const App: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       showToast(err.message ?? "Error creating assignment", "error");
+    }
+  }
+
+  async function handleToggleSubtask(assignmentId: number, subtaskId: number) {
+    const assignment = assignments.find((a) => a.id === assignmentId);
+    if (!assignment || !assignment.subtasks) return;
+
+    const updatedSubtasks = assignment.subtasks.map((subtask) =>
+      subtask.id === subtaskId
+        ? {
+            ...subtask,
+            completed: subtask.completed === 1 ? 0 : 1
+          }
+        : subtask
+    );
+
+    try {
+      await updateAssignment(assignmentId, {
+        subtasks: updatedSubtasks
+      });
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message ?? "Error updating subtask", "error");
     }
   }
 
@@ -112,10 +143,26 @@ const App: React.FC = () => {
           backdropFilter: "blur(10px)"
         }}
       >
-        <h1 style={{ margin: 0, textAlign: "center", fontSize: "2rem", letterSpacing: "0.03em" }}>
-        💙 Task Manager 💙
+        <h1
+          style={{
+            margin: 0,
+            textAlign: "center",
+            fontSize: "2rem",
+            letterSpacing: "0.03em"
+          }}
+        >
+          💙 Task Manager 💙
         </h1>
-        <p style={{ margin: 0, marginTop: "0.25rem", textAlign: "center", color: "#6b7280", fontSize: "0.95rem" }}>
+
+        <p
+          style={{
+            margin: 0,
+            marginTop: "0.25rem",
+            textAlign: "center",
+            color: "#6b7280",
+            fontSize: "0.95rem"
+          }}
+        >
           I love you so much baby :)
         </p>
       </header>
@@ -150,12 +197,12 @@ const App: React.FC = () => {
           sortBy={sortBy}
           setSortBy={setSortBy}
           onDeleteAssignment={handleDeleteAssignment}
+          onToggleSubtask={handleToggleSubtask}
           onAddSubject={handleAddSubject}
           onDeleteSubject={handleDeleteSubject}
         />
       </main>
 
-      {/* Add Assignment modal */}
       {showForm && (
         <div
           style={{

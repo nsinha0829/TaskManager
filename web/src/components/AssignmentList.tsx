@@ -7,7 +7,8 @@ type Props = {
   onSubjectFilterChange: (subject: string) => void;
   sortBy: "dueDate" | "subject";
   onSortByChange: (sortBy: "dueDate" | "subject") => void;
-  onDelete: (id: number) => void; // checkbox will delete
+  onDelete: (id: number) => void;
+  onToggleSubtask: (assignmentId: number, subtaskId: number) => void;
 };
 
 export const AssignmentList: React.FC<Props> = ({
@@ -16,7 +17,8 @@ export const AssignmentList: React.FC<Props> = ({
   onSubjectFilterChange,
   sortBy,
   onSortByChange,
-  onDelete
+  onDelete,
+  onToggleSubtask
 }) => {
   const subjects = Array.from(
     new Set(assignments.map((a) => a.subject))
@@ -33,6 +35,7 @@ export const AssignmentList: React.FC<Props> = ({
         }}
       >
         <h2 style={{ margin: 0 }}>Assignments</h2>
+
         <span style={{ color: "#555", fontSize: "0.9rem" }}>
           Total: {assignments.length}
         </span>
@@ -51,6 +54,7 @@ export const AssignmentList: React.FC<Props> = ({
               }}
             >
               <option value="">All</option>
+
               {subjects.map((subj) => (
                 <option key={subj} value={subj}>
                   {subj}
@@ -120,6 +124,7 @@ export const AssignmentList: React.FC<Props> = ({
                   }}
                 >
                   <strong>{a.title}</strong>
+
                   <span
                     style={{
                       padding: "0.1rem 0.45rem",
@@ -140,15 +145,45 @@ export const AssignmentList: React.FC<Props> = ({
                 {a.subtasks && a.subtasks.length > 0 && (
                   <ul
                     style={{
-                      margin: "0.3rem 0 0",
-                      paddingLeft: "1.1rem",
-                      fontSize: "0.78rem",
+                      margin: "0.4rem 0 0",
+                      paddingLeft: 0,
+                      fontSize: "0.86rem",
                       fontStyle: "italic",
-                      color: "#6b7280"
+                      color: "#6b7280",
+                      listStyle: "none"
                     }}
                   >
-                    {a.subtasks.map((subtask, index) => (
-                      <li key={index}>{subtask}</li>
+                    {a.subtasks.map((subtask) => (
+                      <li
+                        key={subtask.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.4rem",
+                          marginTop: "0.2rem"
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={subtask.completed === 1}
+                          onChange={() => onToggleSubtask(a.id, subtask.id)}
+                          style={{
+                            cursor: "pointer",
+                            width: "0.85rem",
+                            height: "0.85rem"
+                          }}
+                        />
+
+                        <span
+                          style={{
+                            textDecoration:
+                              subtask.completed === 1 ? "line-through" : "none",
+                            opacity: subtask.completed === 1 ? 0.65 : 1
+                          }}
+                        >
+                          {subtask.text}
+                        </span>
+                      </li>
                     ))}
                   </ul>
                 )}

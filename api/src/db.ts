@@ -1,5 +1,11 @@
 // api/src/db.ts
 
+export type Subtask = {
+  id: number;
+  text: string;
+  completed: number; // 0 or 1
+};
+
 export type Assignment = {
   id: number;
   title: string;
@@ -7,11 +13,42 @@ export type Assignment = {
   dueDate: string; // ISO string (yyyy-mm-dd)
   color: string;
   completed: number; // 0 or 1
-  subtasks?: string[];
+  subtasks?: Subtask[];
 };
 
 let assignments: Assignment[] = [];
 let nextId = 1;
+let nextSubtaskId = 1;
+
+function normalizeSubtasks(
+  subtasks?: Array<string | Partial<Subtask>>
+): Subtask[] {
+  if (!Array.isArray(subtasks)) return [];
+
+  return subtasks
+    .map((subtask) => {
+      if (typeof subtask === "string") {
+        const text = subtask.trim();
+        if (!text) return null;
+
+        return {
+          id: nextSubtaskId++,
+          text,
+          completed: 0
+        };
+      }
+
+      const text = typeof subtask.text === "string" ? subtask.text.trim() : "";
+      if (!text) return null;
+
+      return {
+        id: typeof subtask.id === "number" ? subtask.id : nextSubtaskId++,
+        text,
+        completed: subtask.completed === 1 ? 1 : 0
+      };
+    })
+    .filter((subtask): subtask is Subtask => subtask !== null);
+}
 
 export function getAllAssignments(
   subject?: string,
@@ -20,17 +57,19 @@ export function getAllAssignments(
 ): Assignment[] {
   let result = [...assignments];
 
-  if (subject && subject.trim() !== " ") {
+  if (subject && subject.trim() !== "") {
     result = result.filter((a) => a.subject === subject);
   }
 
   result.sort((a, b) => {
     let cmp = 0;
+
     if (sortBy === "dueDate") {
       cmp = a.dueDate.localeCompare(b.dueDate);
     } else if (sortBy === "subject") {
       cmp = a.subject.localeCompare(b.subject);
     }
+
     return order === "asc" ? cmp : -cmp;
   });
 
@@ -42,7 +81,7 @@ export function createAssignment(input: {
   subject: string;
   dueDate: string;
   color: string;
-  subtasks?: string[];
+  subtasks?: Array<string | Partial<Subtask>>;
 }): Assignment {
   const assignment: Assignment = {
     id: nextId++,
@@ -51,7 +90,7 @@ export function createAssignment(input: {
     dueDate: input.dueDate,
     color: input.color,
     completed: 0,
-    subtasks: input.subtasks ?? []
+    subtasks: normalizeSubtasks(input.subtasks)
   };
 
   assignments.push(assignment);
@@ -67,7 +106,10 @@ export function updateAssignment(
 
   const updated: Assignment = {
     ...assignments[idx],
-    ...fields
+    ...fields,
+    subtasks: fields.subtasks
+      ? normalizeSubtasks(fields.subtasks)
+      : assignments[idx].subtasks
   };
 
   assignments[idx] = updated;
