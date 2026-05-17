@@ -70,6 +70,7 @@ const App: React.FC = () => {
     subject: string;
     dueDate: string;
     color: string;
+    subtasks?: string[];
   }) {
     try {
       await createAssignment(input);

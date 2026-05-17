@@ -3,7 +3,7 @@ import {
   getAllAssignments,
   createAssignment,
   updateAssignment,
-  deleteAssignment,
+  deleteAssignment
 } from "../db";
 
 const assignments = new Hono();
@@ -24,13 +24,24 @@ assignments.get("/", (c) => {
 // POST /assignments
 assignments.post("/", async (c) => {
   const body = await c.req.json();
-  const { title, subject, dueDate, color } = body;
+  const { title, subject, dueDate, color, subtasks } = body;
 
   if (!title || !subject || !dueDate || !color) {
     return c.json({ error: "Missing fields" }, 400);
   }
 
-  const created = createAssignment({ title, subject, dueDate, color });
+  const created = createAssignment({
+    title,
+    subject,
+    dueDate,
+    color,
+    subtasks: Array.isArray(subtasks)
+      ? subtasks.filter(
+          (subtask) => typeof subtask === "string" && subtask.trim() !== ""
+        )
+      : []
+  });
+
   return c.json(created, 201);
 });
 

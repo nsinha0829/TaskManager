@@ -132,9 +132,26 @@ export const AssignmentList: React.FC<Props> = ({
                     {a.subject}
                   </span>
                 </div>
+
                 <div style={{ fontSize: "0.85rem", color: "#555" }}>
                   Due: {a.dueDate}
                 </div>
+
+                {a.subtasks && a.subtasks.length > 0 && (
+                  <ul
+                    style={{
+                      margin: "0.3rem 0 0",
+                      paddingLeft: "1.1rem",
+                      fontSize: "0.78rem",
+                      fontStyle: "italic",
+                      color: "#6b7280"
+                    }}
+                  >
+                    {a.subtasks.map((subtask, index) => (
+                      <li key={index}>{subtask}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <label

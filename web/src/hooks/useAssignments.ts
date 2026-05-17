@@ -50,6 +50,7 @@ export function useAssignments({
     subject: string;
     dueDate: string;
     color: string;
+    subtasks?: string[];
   }) {
     const res = await fetch(`${API_BASE}/assignments`, {
       method: "POST",

@@ -8,6 +8,7 @@ type Props = {
     subject: string;
     dueDate: string;
     color: string;
+    subtasks?: string[];
   }) => Promise<void>;
 };
 
@@ -18,6 +19,7 @@ export const AssignmentForm: React.FC<Props> = ({
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [subtasks, setSubtasks] = useState("");
   const [loading, setLoading] = useState(false);
 
   const hasSubjects = subjects.length > 0;
@@ -43,10 +45,15 @@ export const AssignmentForm: React.FC<Props> = ({
         title,
         subject: selectedSubject.name,
         dueDate,
-        color: selectedSubject.color
+        color: selectedSubject.color,
+        subtasks: subtasks
+          .split("\n")
+          .map((subtask) => subtask.trim())
+          .filter(Boolean)
       });
       setTitle("");
       setDueDate("");
+      setSubtasks("");
       // keep same subject for next add
     } finally {
       setLoading(false);
@@ -160,6 +167,24 @@ export const AssignmentForm: React.FC<Props> = ({
             borderRadius: "0.6rem",
             border: "1px solid #d4d4d8",
             marginTop: "0.15rem"
+          }}
+        />
+      </label>
+
+      <label style={{ fontSize: "0.9rem" }}>
+        Subtasks
+        <textarea
+          value={subtasks}
+          onChange={(e) => setSubtasks(e.target.value)}
+          placeholder="One subtask per line"
+          style={{
+            width: "100%",
+            padding: "0.4rem 0.6rem",
+            borderRadius: "0.6rem",
+            border: "1px solid #d4d4d8",
+            marginTop: "0.15rem",
+            minHeight: "4rem",
+            resize: "vertical"
           }}
         />
       </label>
