@@ -5,27 +5,30 @@ import { cors } from "hono/cors";
 
 const app = new Hono();
 
-// Proper CORS for your React dev server on 5173
+const allowedOrigin = process.env.CORS_ORIGIN ?? "http://localhost:5173";
+
 app.use(
   "*",
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigin,
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type"]
   })
 );
 
-// Health check
 app.get("/", (c) => c.text("Assignment Tracker API"));
 
-// Mount routes
 app.route("/assignments", assignments);
 
-const port = 3000;
+const port = Number(process.env.PORT) || 3000;
 
-serve({
-  fetch: app.fetch,
-  port,
-});
-
-console.log(`API listening on http://localhost:${port}`);
+serve(
+  {
+    fetch: app.fetch,
+    port,
+    hostname: "0.0.0.0"
+  },
+  (info) => {
+    console.log(`API listening on http://0.0.0.0:${info.port}`);
+  }
+);
