@@ -1,11 +1,13 @@
 import React from "react";
 import type { Assignment } from "../types";
 import type { Subject } from "./SubjectForm";
+import { AssignmentCalendar } from "./AssignmentCalendar";
 import { AssignmentList } from "./AssignmentList";
 import { SubjectForm } from "./SubjectForm";
+import type { TabKey } from "./SidebarNav";
 
 type Props = {
-  tab: "assignments" | "subjects";
+  tab: TabKey;
   loading: boolean;
   assignments: Assignment[];
   subjects: Subject[];
@@ -33,26 +35,45 @@ export const MainPanel: React.FC<Props> = ({
   onAddSubject,
   onDeleteSubject
 }) => {
+  const title =
+    tab === "assignments"
+      ? "Assignments"
+      : tab === "calendar"
+      ? "Calendar"
+      : "Subjects";
+
   return (
     <section
       style={{
         flex: 1,
-        backgroundColor: "rgba(255,255,255,0.95)",
         borderRadius: "1.5rem",
-        padding: "1rem 1.25rem",
+        background: "white",
         boxShadow: "0 10px 30px rgba(148, 163, 184, 0.35)",
-        border: "1px solid #e5e7eb",
-        minHeight: "70vh"
+        padding: "1rem 1.25rem",
+        display: "flex",
+        flexDirection: "column"
       }}
     >
-      {tab === "assignments" && (
-        <>
-          {loading && (
-            <p style={{ color: "#6b7280", fontSize: "0.9rem" }}>
-              Loading assignments...
-            </p>
-          )}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: "1rem",
+          marginBottom: "0.75rem"
+        }}
+      >
+        <h2 style={{ margin: 0 }}>{title}</h2>
 
+        {loading && (
+          <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>
+            Loading…
+          </span>
+        )}
+      </div>
+
+      {tab === "assignments" && (
+        <div style={{ flex: 1 }}>
           <AssignmentList
             assignments={assignments}
             subjectFilter={subjectFilter}
@@ -62,15 +83,42 @@ export const MainPanel: React.FC<Props> = ({
             onDelete={onDeleteAssignment}
             onToggleSubtask={onToggleSubtask}
           />
-        </>
+        </div>
+      )}
+
+      {tab === "calendar" && (
+        <div
+          style={{
+            flex: 1,
+            width: "100%",
+            paddingTop: "0.5rem"
+          }}
+        >
+          <AssignmentCalendar assignments={assignments} />
+        </div>
       )}
 
       {tab === "subjects" && (
-        <SubjectForm
-          subjects={subjects}
-          onAddSubject={onAddSubject}
-          onDeleteSubject={onDeleteSubject}
-        />
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            paddingTop: "0.5rem"
+          }}
+        >
+          <div style={{ width: "100%", maxWidth: "520px" }}>
+            <p style={{ marginTop: 0, color: "#6b7280" }}>
+              Create subjects and pick a color. Assignments inherit the subject color.
+            </p>
+
+            <SubjectForm
+              subjects={subjects}
+              onAddSubject={onAddSubject}
+              onDeleteSubject={onDeleteSubject}
+            />
+          </div>
+        </div>
       )}
     </section>
   );
