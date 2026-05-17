@@ -9,6 +9,7 @@ export type Assignment = {
   title: string;
   subject: string;
   dueDate: string; // yyyy-mm-dd
+  dueTime?: string; // HH:mm
   color: string;
   completed: number; // 0 or 1
   subtasks?: Subtask[];

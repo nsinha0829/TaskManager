@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Assignment } from "../types";
+import type { Assignment, Subtask } from "../types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
 
@@ -7,6 +7,12 @@ type UseAssignmentsArgs = {
   subjectFilter: string;
   sortBy: "dueDate" | "subject";
   onError: (msg: string) => void;
+};
+
+export type AssignmentUpdateInput = Partial<
+  Omit<Assignment, "id" | "subtasks">
+> & {
+  subtasks?: string[] | Subtask[];
 };
 
 async function fetchWithTimeout(
@@ -76,6 +82,7 @@ export function useAssignments({
     title: string;
     subject: string;
     dueDate: string;
+    dueTime?: string;
     color: string;
     subtasks?: string[];
   }) {
@@ -109,10 +116,7 @@ export function useAssignments({
     }
   }
 
-  async function updateAssignment(
-    id: number,
-    fields: Partial<Omit<Assignment, "id">>
-  ) {
+  async function updateAssignment(id: number, fields: AssignmentUpdateInput) {
     const res = await fetchWithTimeout(`${API_BASE}/assignments/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },

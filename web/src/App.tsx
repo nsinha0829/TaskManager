@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useToast } from "./toast/ToastContext";
 import { useSubjects } from "./hooks/useSubjects";
-import { useAssignments } from "./hooks/useAssignments";
+import { AssignmentUpdateInput, useAssignments } from "./hooks/useAssignments";
 
 import { SidebarNav, TabKey } from "./components/SidebarNav";
 import { MainPanel } from "./components/MainPanel";
@@ -77,6 +77,7 @@ const App: React.FC = () => {
     title: string;
     subject: string;
     dueDate: string;
+    dueTime?: string;
     color: string;
     subtasks?: string[];
   }) {
@@ -89,6 +90,16 @@ const App: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       showToast(err.message ?? "Error creating assignment", "error");
+    }
+  }
+
+  async function handleUpdateAssignment(id: number, fields: AssignmentUpdateInput) {
+    try {
+      await updateAssignment(id, fields);
+      showToast("Assignment updated ✨", "success");
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message ?? "Error updating assignment", "error");
     }
   }
 
@@ -197,6 +208,7 @@ const App: React.FC = () => {
           sortBy={sortBy}
           setSortBy={setSortBy}
           onDeleteAssignment={handleDeleteAssignment}
+          onUpdateAssignment={handleUpdateAssignment}
           onToggleSubtask={handleToggleSubtask}
           onAddSubject={handleAddSubject}
           onDeleteSubject={handleDeleteSubject}

@@ -46,10 +46,26 @@ function getTodayKey() {
   return formatDateKey(today.getFullYear(), today.getMonth(), today.getDate());
 }
 
+function formatTime(time?: string) {
+  if (!time) return "";
+
+  const [hourString, minuteString] = time.split(":");
+  const hour = Number(hourString);
+  const minute = Number(minuteString);
+
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return time;
+
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+
+  return `${displayHour}:${String(minute).padStart(2, "0")} ${suffix}`;
+}
+
 export const AssignmentCalendar: React.FC<Props> = ({ assignments }) => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const currentDate = new Date();
+
+  const [visibleMonth, setVisibleMonth] = useState(currentDate.getMonth());
+  const [visibleYear, setVisibleYear] = useState(currentDate.getFullYear());
 
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
   const [classSchedule, setClassSchedule] = useState<ClassScheduleItem[]>([]);
@@ -93,36 +109,70 @@ export const AssignmentCalendar: React.FC<Props> = ({ assignments }) => {
       map[key].push(assignment);
     }
 
+    for (const dateKey of Object.keys(map)) {
+      map[dateKey].sort((a, b) => {
+        if (!a.dueTime && !b.dueTime) return 0;
+        if (!a.dueTime) return 1;
+        if (!b.dueTime) return -1;
+        return a.dueTime.localeCompare(b.dueTime);
+      });
+    }
+
     return map;
   }, [assignments]);
 
   const days: DayInfo[] = useMemo(() => {
     const result: DayInfo[] = [];
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInMonth = new Date(visibleYear, visibleMonth + 1, 0).getDate();
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateString = formatDateKey(year, month, day);
-      const dayOfWeek = new Date(year, month, day).getDay();
+      const dateString = formatDateKey(visibleYear, visibleMonth, day);
+      const dayOfWeek = new Date(visibleYear, visibleMonth, day).getDay();
 
       result.push({
         day,
         dateString,
         dayOfWeek,
         assignments: assignmentsByDate[dateString] ?? [],
-        classes: classSchedule.filter((classItem) =>
-          classItem.daysOfWeek.includes(dayOfWeek)
-        )
+        classes: classSchedule
+          .filter((classItem) => classItem.daysOfWeek.includes(dayOfWeek))
+          .sort((a, b) => a.startTime.localeCompare(b.startTime))
       });
     }
 
     return result;
-  }, [year, month, assignmentsByDate, classSchedule]);
+  }, [visibleYear, visibleMonth, assignmentsByDate, classSchedule]);
 
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const firstDayOfMonth = new Date(visibleYear, visibleMonth, 1).getDay();
 
-  const monthName = today.toLocaleString("default", {
-    month: "long"
-  });
+  const monthName = new Date(visibleYear, visibleMonth, 1).toLocaleString(
+    "default",
+    {
+      month: "long"
+    }
+  );
+
+  function goToPreviousMonth() {
+    setVisibleMonth((prev) => {
+      if (prev === 0) {
+        setVisibleYear((year) => year - 1);
+        return 11;
+      }
+
+      return prev - 1;
+    });
+  }
+
+  function goToNextMonth() {
+    setVisibleMonth((prev) => {
+      if (prev === 11) {
+        setVisibleYear((year) => year + 1);
+        return 0;
+      }
+
+      return prev + 1;
+    });
+  }
 
   function toggleSelectedDay(day: number) {
     setSelectedDays((prev) =>
@@ -184,28 +234,73 @@ export const AssignmentCalendar: React.FC<Props> = ({ assignments }) => {
           gap: "0.85rem"
         }}
       >
-        <div>
-          <h2
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "40px 1fr 40px",
+            alignItems: "center",
+            gap: "0.75rem"
+          }}
+        >
+          <button
+            type="button"
+            onClick={goToPreviousMonth}
             style={{
-              margin: 0,
-              fontSize: "1.35rem",
-              textAlign: "center"
+              border: "1px solid #dbeafe",
+              backgroundColor: "#eff6ff",
+              color: "#1d4ed8",
+              borderRadius: "999px",
+              width: "38px",
+              height: "38px",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              fontWeight: 800
             }}
           >
-            {monthName} {year}
-          </h2>
+            ‹
+          </button>
 
-          <p
+          <div>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "1.35rem",
+                textAlign: "center"
+              }}
+            >
+              {monthName} {visibleYear}
+            </h2>
+
+            <p
+              style={{
+                margin: 0,
+                marginTop: "0.2rem",
+                textAlign: "center",
+                fontSize: "0.85rem",
+                color: "#6b7280"
+              }}
+            >
+              Tasks and class schedule are shown directly on each day.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={goToNextMonth}
             style={{
-              margin: 0,
-              marginTop: "0.2rem",
-              textAlign: "center",
-              fontSize: "0.85rem",
-              color: "#6b7280"
+              border: "1px solid #dbeafe",
+              backgroundColor: "#eff6ff",
+              color: "#1d4ed8",
+              borderRadius: "999px",
+              width: "38px",
+              height: "38px",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              fontWeight: 800
             }}
           >
-            Tasks and class schedule are shown directly on each day.
-          </p>
+            ›
+          </button>
         </div>
 
         <div
@@ -287,7 +382,7 @@ export const AssignmentCalendar: React.FC<Props> = ({ assignments }) => {
                   {dayInfo.classes.slice(0, 2).map((classItem) => (
                     <div
                       key={`class-${classItem.id}`}
-                      title={`${classItem.name} ${classItem.startTime}-${classItem.endTime}`}
+                      title={`${classItem.name} ${formatTime(classItem.startTime)}-${formatTime(classItem.endTime)}`}
                       style={{
                         borderRadius: "0.45rem",
                         padding: "0.18rem 0.35rem",
@@ -300,7 +395,7 @@ export const AssignmentCalendar: React.FC<Props> = ({ assignments }) => {
                         textOverflow: "ellipsis"
                       }}
                     >
-                      {classItem.name}
+                      {formatTime(classItem.startTime)} {classItem.name}
                     </div>
                   ))}
 
@@ -321,6 +416,7 @@ export const AssignmentCalendar: React.FC<Props> = ({ assignments }) => {
                         textOverflow: "ellipsis"
                       }}
                     >
+                      {assignment.dueTime ? `${formatTime(assignment.dueTime)} ` : ""}
                       {assignment.title}
                     </div>
                   ))}
@@ -349,7 +445,7 @@ export const AssignmentCalendar: React.FC<Props> = ({ assignments }) => {
                       borderRadius: "0.75rem",
                       boxShadow: "0 12px 30px rgba(15, 23, 42, 0.25)",
                       padding: "0.65rem 0.75rem",
-                      minWidth: "260px",
+                      minWidth: "280px",
                       zIndex: 20
                     }}
                   >
@@ -409,7 +505,7 @@ export const AssignmentCalendar: React.FC<Props> = ({ assignments }) => {
                                 fontSize: "0.7rem"
                               }}
                             >
-                              {classItem.startTime}-{classItem.endTime}
+                              {formatTime(classItem.startTime)}-{formatTime(classItem.endTime)}
                             </span>
                           </div>
                         ))}
@@ -461,9 +557,20 @@ export const AssignmentCalendar: React.FC<Props> = ({ assignments }) => {
                               {assignment.title}
                             </span>
 
+                            {assignment.dueTime && (
+                              <span
+                                style={{
+                                  marginLeft: "auto",
+                                  color: "#6b7280",
+                                  fontSize: "0.7rem"
+                                }}
+                              >
+                                {formatTime(assignment.dueTime)}
+                              </span>
+                            )}
+
                             <span
                               style={{
-                                marginLeft: "auto",
                                 fontSize: "0.7rem",
                                 padding: "0.05rem 0.3rem",
                                 borderRadius: "999px",
@@ -739,7 +846,7 @@ export const AssignmentCalendar: React.FC<Props> = ({ assignments }) => {
                             WEEKDAYS.find((day) => day.value === dayValue)?.label
                         )
                         .join(", ")}{" "}
-                      · {classItem.startTime}-{classItem.endTime}
+                      · {formatTime(classItem.startTime)}-{formatTime(classItem.endTime)}
                       {classItem.location ? ` · ${classItem.location}` : ""}
                     </div>
                   </div>

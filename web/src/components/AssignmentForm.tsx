@@ -7,6 +7,7 @@ type Props = {
     title: string;
     subject: string;
     dueDate: string;
+    dueTime?: string;
     color: string;
     subtasks?: string[];
   }) => Promise<void>;
@@ -19,6 +20,7 @@ export const AssignmentForm: React.FC<Props> = ({
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [dueTime, setDueTime] = useState("");
   const [subtasks, setSubtasks] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -47,6 +49,7 @@ export const AssignmentForm: React.FC<Props> = ({
         title,
         subject: selectedSubject.name,
         dueDate,
+        dueTime,
         color: selectedSubject.color,
         subtasks: subtasks
           .split("\n")
@@ -56,6 +59,7 @@ export const AssignmentForm: React.FC<Props> = ({
 
       setTitle("");
       setDueDate("");
+      setDueTime("");
       setSubtasks("");
       // keep same subject for next add
     } finally {
@@ -158,21 +162,47 @@ export const AssignmentForm: React.FC<Props> = ({
         )}
       </label>
 
-      <label style={{ fontSize: "0.9rem" }}>
-        Due date
-        <input
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "0.4rem 0.6rem",
-            borderRadius: "0.6rem",
-            border: "1px solid #d4d4d8",
-            marginTop: "0.15rem"
-          }}
-        />
-      </label>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "0.75rem"
+        }}
+      >
+        <label style={{ fontSize: "0.9rem" }}>
+          Due date
+          <input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "0.4rem 0.6rem",
+              borderRadius: "0.6rem",
+              border: "1px solid #d4d4d8",
+              marginTop: "0.15rem"
+            }}
+          />
+        </label>
+
+        <label style={{ fontSize: "0.9rem" }}>
+          Due time
+          <input
+            type="time"
+            value={dueTime}
+            onChange={(e) => setDueTime(e.target.value)}
+            disabled={!dueDate}
+            style={{
+              width: "100%",
+              padding: "0.4rem 0.6rem",
+              borderRadius: "0.6rem",
+              border: "1px solid #d4d4d8",
+              marginTop: "0.15rem",
+              backgroundColor: dueDate ? "white" : "#f3f4f6"
+            }}
+          />
+        </label>
+      </div>
 
       <label style={{ fontSize: "0.9rem" }}>
         Subtasks

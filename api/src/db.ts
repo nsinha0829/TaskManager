@@ -11,6 +11,7 @@ export type Assignment = {
   title: string;
   subject: string;
   dueDate: string; // ISO string (yyyy-mm-dd)
+  dueTime?: string; // HH:mm
   color: string;
   completed: number; // 0 or 1
   subtasks?: Subtask[];
@@ -66,6 +67,10 @@ export function getAllAssignments(
 
     if (sortBy === "dueDate") {
       cmp = a.dueDate.localeCompare(b.dueDate);
+
+      if (cmp === 0) {
+        cmp = (a.dueTime || "").localeCompare(b.dueTime || "");
+      }
     } else if (sortBy === "subject") {
       cmp = a.subject.localeCompare(b.subject);
     }
@@ -80,6 +85,7 @@ export function createAssignment(input: {
   title: string;
   subject: string;
   dueDate: string;
+  dueTime?: string;
   color: string;
   subtasks?: Array<string | Partial<Subtask>>;
 }): Assignment {
@@ -88,6 +94,7 @@ export function createAssignment(input: {
     title: input.title,
     subject: input.subject,
     dueDate: input.dueDate,
+    dueTime: input.dueTime || "",
     color: input.color,
     completed: 0,
     subtasks: normalizeSubtasks(input.subtasks)
@@ -107,6 +114,7 @@ export function updateAssignment(
   const updated: Assignment = {
     ...assignments[idx],
     ...fields,
+    dueTime: fields.dueTime ?? assignments[idx].dueTime ?? "",
     subtasks: fields.subtasks
       ? normalizeSubtasks(fields.subtasks)
       : assignments[idx].subtasks

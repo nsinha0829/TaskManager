@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Assignment } from "../types";
+import type { AssignmentUpdateInput } from "../hooks/useAssignments";
 import type { Subject } from "./SubjectForm";
 import { AssignmentCalendar } from "./AssignmentCalendar";
 import { AssignmentList } from "./AssignmentList";
@@ -16,6 +17,7 @@ type Props = {
   sortBy: "dueDate" | "subject";
   setSortBy: (sortBy: "dueDate" | "subject") => void;
   onDeleteAssignment: (id: number) => void;
+  onUpdateAssignment: (id: number, fields: AssignmentUpdateInput) => void;
   onToggleSubtask: (assignmentId: number, subtaskId: number) => void;
   onAddSubject: (subject: Subject) => void;
   onDeleteSubject: (name: string) => void;
@@ -31,16 +33,31 @@ export const MainPanel: React.FC<Props> = ({
   sortBy,
   setSortBy,
   onDeleteAssignment,
+  onUpdateAssignment,
   onToggleSubtask,
   onAddSubject,
   onDeleteSubject
 }) => {
+  const [showSuggestionBox, setShowSuggestionBox] = useState(false);
+  const [suggestionText, setSuggestionText] = useState("");
+
   const title =
     tab === "assignments"
       ? "Assignments"
       : tab === "calendar"
       ? "Calendar"
       : "Subjects";
+
+  function handleSubmitSuggestion() {
+    const subject = encodeURIComponent("Task Manager Suggestion");
+    const body = encodeURIComponent(
+      suggestionText.trim()
+        ? suggestionText.trim()
+        : "Suggestion for the Task Manager:"
+    );
+
+    window.location.href = `mailto:nitisinha0829@gmail.com?subject=${subject}&body=${body}`;
+  }
 
   return (
     <section
@@ -65,22 +82,121 @@ export const MainPanel: React.FC<Props> = ({
       >
         <h2 style={{ margin: 0 }}>{title}</h2>
 
-        {loading && (
-          <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>
-            Loading…
-          </span>
-        )}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem"
+          }}
+        >
+          {loading && (
+            <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>
+              Loading…
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setShowSuggestionBox((prev) => !prev)}
+            style={{
+              border: "1px solid #bfdbfe",
+              backgroundColor: "#eff6ff",
+              color: "#1d4ed8",
+              borderRadius: "999px",
+              padding: "0.35rem 0.75rem",
+              cursor: "pointer",
+              fontSize: "0.82rem",
+              fontWeight: 700
+            }}
+          >
+            Suggest a Change
+          </button>
+        </div>
       </div>
+
+      {showSuggestionBox && (
+        <div
+          style={{
+            border: "1px solid #dbeafe",
+            backgroundColor: "#f8fafc",
+            borderRadius: "1rem",
+            padding: "0.75rem",
+            marginBottom: "0.9rem"
+          }}
+        >
+          <textarea
+            value={suggestionText}
+            onChange={(e) => setSuggestionText(e.target.value)}
+            placeholder="Write your suggestion here..."
+            style={{
+              width: "100%",
+              minHeight: "4.5rem",
+              resize: "vertical",
+              border: "1px solid #d4d4d8",
+              borderRadius: "0.7rem",
+              padding: "0.55rem 0.65rem",
+              fontFamily: "inherit",
+              fontSize: "0.9rem"
+            }}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "0.5rem",
+              marginTop: "0.5rem"
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setShowSuggestionBox(false);
+                setSuggestionText("");
+              }}
+              style={{
+                border: "1px solid #e5e7eb",
+                backgroundColor: "white",
+                borderRadius: "999px",
+                padding: "0.35rem 0.75rem",
+                cursor: "pointer",
+                fontSize: "0.82rem"
+              }}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSubmitSuggestion}
+              style={{
+                border: "none",
+                backgroundColor: "#2563eb",
+                color: "white",
+                borderRadius: "999px",
+                padding: "0.35rem 0.85rem",
+                cursor: "pointer",
+                fontSize: "0.82rem",
+                fontWeight: 700
+              }}
+            >
+              Email Suggestion
+            </button>
+          </div>
+        </div>
+      )}
 
       {tab === "assignments" && (
         <div style={{ flex: 1 }}>
           <AssignmentList
             assignments={assignments}
+            subjects={subjects}
             subjectFilter={subjectFilter}
             onSubjectFilterChange={setSubjectFilter}
             sortBy={sortBy}
             onSortByChange={setSortBy}
             onDelete={onDeleteAssignment}
+            onUpdateAssignment={onUpdateAssignment}
             onToggleSubtask={onToggleSubtask}
           />
         </div>
