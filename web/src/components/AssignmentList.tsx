@@ -139,7 +139,7 @@ export const AssignmentList: React.FC<Props> = ({
                 </div>
 
                 <div style={{ fontSize: "0.85rem", color: "#555" }}>
-                  Due: {a.dueDate}
+                  Due: {a.dueDate || "No due date"}
                 </div>
 
                 {a.subtasks && a.subtasks.length > 0 && (

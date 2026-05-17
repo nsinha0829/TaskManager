@@ -26,14 +26,14 @@ assignments.post("/", async (c) => {
   const body = await c.req.json();
   const { title, subject, dueDate, color, subtasks } = body;
 
-  if (!title || !subject || !dueDate || !color) {
+  if (!title || !subject || !color) {
     return c.json({ error: "Missing fields" }, 400);
   }
 
   const created = createAssignment({
     title,
     subject,
-    dueDate,
+    dueDate: dueDate || "",
     color,
     subtasks: Array.isArray(subtasks) ? subtasks : []
   });

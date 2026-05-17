@@ -38,8 +38,10 @@ export const AssignmentForm: React.FC<Props> = ({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title || !dueDate || !selectedSubject) return;
+    if (!title || !selectedSubject) return;
+
     setLoading(true);
+
     try {
       await onCreate({
         title,
@@ -51,6 +53,7 @@ export const AssignmentForm: React.FC<Props> = ({
           .map((subtask) => subtask.trim())
           .filter(Boolean)
       });
+
       setTitle("");
       setDueDate("");
       setSubtasks("");
@@ -137,6 +140,7 @@ export const AssignmentForm: React.FC<Props> = ({
                 </option>
               ))}
             </select>
+
             {selectedSubject && (
               <span
                 title={`Color for ${selectedSubject.name}`}
@@ -160,7 +164,6 @@ export const AssignmentForm: React.FC<Props> = ({
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          required
           style={{
             width: "100%",
             padding: "0.4rem 0.6rem",
