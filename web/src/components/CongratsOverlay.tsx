@@ -32,7 +32,7 @@ export function CongratsOverlay(props: { open: boolean; onClose: () => void }) {
       >
         <div style={{ fontSize: "2.4rem", marginBottom: "0.4rem" }}>Yayyy!!!</div>
         <p style={{ margin: 0, marginBottom: "0.9rem", fontSize: "1rem", color: "#4b5563" }}>
-          I'm so proud of you baby
+          I'm so proud
         </p>
         <button
           type="button"

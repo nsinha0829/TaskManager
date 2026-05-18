@@ -174,7 +174,7 @@ const App: React.FC = () => {
             fontSize: "0.95rem"
           }}
         >
-          I love you so much baby :)
+          Yayyyy :)
         </p>
       </header>
 
